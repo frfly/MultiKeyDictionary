@@ -3,6 +3,7 @@ using System.Threading;
 
 namespace MultiKeyDictionary
 {
+    /// <summary>Потокобезопасный словарь</summary>
     public class ThreadSafeDoubleKeyDictionary<TLeftKey, TRightKey, TValue> :
         DoubleKeyDictionary<TLeftKey, TRightKey, TValue>
     {

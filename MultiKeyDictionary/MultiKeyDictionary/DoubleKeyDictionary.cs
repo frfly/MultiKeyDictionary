@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Net.WebSockets;
 
 namespace MultiKeyDictionary
 {
+    /// <summary>Словарь с двумя ключами</summary>
+    /// <typeparam name="TLeftKey">Тип "левого" ключа</typeparam>
+    /// <typeparam name="TRightKey">Тип "правого" ключа</typeparam>
+    /// <typeparam name="TValue">Тип значения</typeparam>
     public class DoubleKeyDictionary<TLeftKey, TRightKey, TValue>
     {
         private readonly double _loadFactor = 1.5;
@@ -22,6 +25,9 @@ namespace MultiKeyDictionary
             public TValue Value;
         }
 
+        /// <summary>Получить все совпадения по "левому" ключу</summary>
+        /// <param name="key">Ключ</param>
+        /// <returns>Коллекция значений</returns>
         public virtual IReadOnlyList<TValue> GetValuesByLeftKey(TLeftKey key)
         {
             var leftHashCode = (_leftComparer.GetHashCode(key) & 0x7FFFFFFF) % _size;
@@ -45,6 +51,10 @@ namespace MultiKeyDictionary
             return result;
         }
 
+
+        /// <summary>Получить все совпадения по "правому" ключу</summary>
+        /// <param name="key">Ключ</param>
+        /// <returns>Коллекция значений</returns>
         public virtual IReadOnlyList<TValue> GetValuesByRightKey(TRightKey key)
         {
             var rightHashCode = (_rightComparer.GetHashCode(key) & 0x7FFFFFFF) % _size;
@@ -95,6 +105,11 @@ namespace MultiKeyDictionary
         }
 
 
+        /// <summary>Получить значений по двум ключам</summary>
+        /// <param name="leftKey">"Левый" ключ</param>
+        /// <param name="rightKey">"Правый" ключ</param>
+        /// <returns>Значение</returns>
+        /// <exception cref="KeyNotFoundException">Если запись по ключам не найдена</exception>
         public virtual TValue Get(TLeftKey leftKey, TRightKey rightKey)
         {
             if (!TryGetValue(leftKey, rightKey, out var value))
@@ -105,6 +120,12 @@ namespace MultiKeyDictionary
             return value;
         }
 
+        /// <summary>Добавить запись</summary>
+        /// <param name="leftKey">"Левый" ключ</param>
+        /// <param name="rightKey">"Правый" ключ</param>
+        /// <param name="value">Значение</param>
+        /// <exception cref="ArgumentNullException">Возникает при ключах равных null</exception>
+        /// <exception cref="ArgumentException">Если такой элемента уже добавлен</exception>
         public virtual void Add(TLeftKey leftKey, TRightKey rightKey, TValue value)
         {
             if (leftKey == null || rightKey == null)
@@ -164,6 +185,11 @@ namespace MultiKeyDictionary
             }
         }
 
+        /// <summary>Попытаться получить значение</summary>
+        /// <param name="leftKey">"Левый" ключ</param>
+        /// <param name="rightKey">"Правый" ключ</param>
+        /// <param name="value">Значение, если оно есть в словаре</param>
+        /// <returns>Успешно ли прошло получение значения</returns>
         public virtual bool TryGetValue(TLeftKey leftKey, TRightKey rightKey, out TValue value)
         {
             var leftHashCode = (_leftComparer.GetHashCode(leftKey) & 0x7FFFFFFF) % _size;
@@ -192,7 +218,7 @@ namespace MultiKeyDictionary
             return false;
         }
 
-        public void Resize()
+        private void Resize()
         {
             var newSize = HashHelpers.ExpandPrime(_count);
 
