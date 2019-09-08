@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Net.WebSockets;
 
 namespace MultiKeyDictionary
 {
     public class DoubleKeyDictionary<TLeftKey, TRightKey, TValue>
     {
+        private readonly double _loadFactor = 1.5;
         private readonly IEqualityComparer<TLeftKey> _leftComparer;
         private readonly IEqualityComparer<TRightKey> _rightComparer;
         private int _size;
+        private int _count;
         private List<Entry>[][] _buckets;
 
         private struct Entry
@@ -127,6 +130,12 @@ namespace MultiKeyDictionary
                     Value = value
                 });
                 _buckets[leftHashCode][rightHashCode] = bucket;
+                _count++;
+                if (_loadFactor < (double) _count / (_size * _size))
+                {
+                    Resize();
+                }
+
                 return;
             }
 
@@ -148,6 +157,11 @@ namespace MultiKeyDictionary
                 RightKey = rightKey,
                 Value = value
             });
+            _count++;
+            if (_loadFactor < (double) _count / (_size * _size))
+            {
+                Resize();
+            }
         }
 
         public virtual bool TryGetValue(TLeftKey leftKey, TRightKey rightKey, out TValue value)
@@ -176,6 +190,36 @@ namespace MultiKeyDictionary
 
             value = default(TValue);
             return false;
+        }
+
+        public void Resize()
+        {
+            var newSize = HashHelpers.ExpandPrime(_count);
+
+            var newBuckets = new List<Entry>[newSize][];
+            for (var i = 0; i < newSize; i++)
+            {
+                newBuckets[i] = new List<Entry>[newSize];
+            }
+
+            var oldBuckets = _buckets;
+            var oldSize = _size;
+
+            _buckets = newBuckets;
+            _size = newSize;
+
+            for (var i = 0; i < oldSize; i++)
+            {
+                for (var j = 0; j < oldSize; j++)
+                {
+                    var chain = oldBuckets[i][j];
+                    for (var k = 0; chain != null && k < chain.Count; k++)
+                    {
+                        var entry = chain[k];
+                        Add(entry.LeftKey, entry.RightKey, entry.Value);
+                    }
+                }
+            }
         }
 
         private void Initialize(int capacity)
