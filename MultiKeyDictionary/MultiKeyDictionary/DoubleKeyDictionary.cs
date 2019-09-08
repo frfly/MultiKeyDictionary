@@ -19,7 +19,7 @@ namespace MultiKeyDictionary
             public TValue Value;
         }
 
-        public IReadOnlyList<TValue> GetValuesByLeftKey(TLeftKey key)
+        public virtual IReadOnlyList<TValue> GetValuesByLeftKey(TLeftKey key)
         {
             var leftHashCode = (_leftComparer.GetHashCode(key) & 0x7FFFFFFF) % _size;
 
@@ -42,7 +42,7 @@ namespace MultiKeyDictionary
             return result;
         }
 
-        public IReadOnlyList<TValue> GetValuesByRightKey(TRightKey key)
+        public virtual IReadOnlyList<TValue> GetValuesByRightKey(TRightKey key)
         {
             var rightHashCode = (_rightComparer.GetHashCode(key) & 0x7FFFFFFF) % _size;
 
@@ -92,7 +92,7 @@ namespace MultiKeyDictionary
         }
 
 
-        public TValue Get(TLeftKey leftKey, TRightKey rightKey)
+        public virtual TValue Get(TLeftKey leftKey, TRightKey rightKey)
         {
             if (!TryGetValue(leftKey, rightKey, out var value))
             {
@@ -102,7 +102,7 @@ namespace MultiKeyDictionary
             return value;
         }
 
-        public void Add(TLeftKey leftKey, TRightKey rightKey, TValue value)
+        public virtual void Add(TLeftKey leftKey, TRightKey rightKey, TValue value)
         {
             if (leftKey == null || rightKey == null)
             {
@@ -150,7 +150,7 @@ namespace MultiKeyDictionary
             });
         }
 
-        public bool TryGetValue(TLeftKey leftKey, TRightKey rightKey, out TValue value)
+        public virtual bool TryGetValue(TLeftKey leftKey, TRightKey rightKey, out TValue value)
         {
             var leftHashCode = (_leftComparer.GetHashCode(leftKey) & 0x7FFFFFFF) % _size;
             var rightHashCode = (_rightComparer.GetHashCode(rightKey) & 0x7FFFFFFF) % _size;
