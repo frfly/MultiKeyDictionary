@@ -4,6 +4,9 @@ using System.Runtime.ConstrainedExecution;
 
 namespace MultiKeyDictionary
 {
+/// <summary>
+/// Хелперы для словаря. Были скопированы из Systems.Collection.Hashtables
+/// </summary>
     internal static class HashHelpers
     {
         // Table of prime numbers to use as hash table sizes. 
@@ -28,13 +31,12 @@ namespace MultiKeyDictionary
 
         private static int HashPrime = 101;
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         public static bool IsPrime(int candidate)
         {
             if ((candidate & 1) != 0)
             {
-                int limit = (int) Math.Sqrt(candidate);
-                for (int divisor = 3; divisor <= limit; divisor += 2)
+                var limit = (int) Math.Sqrt(candidate);
+                for (var divisor = 3; divisor <= limit; divisor += 2)
                 {
                     if ((candidate % divisor) == 0)
                         return false;
@@ -52,15 +54,14 @@ namespace MultiKeyDictionary
            //     throw new ArgumentException(Environment.GetResourceString("Arg_HTCapacityOverflow"));
            // Contract.EndContractBlock();
 
-            for (int i = 0; i < primes.Length; i++)
+            foreach (var prime in primes)
             {
-                int prime = primes[i];
                 if (prime >= min) return prime;
             }
 
             //outside of our predefined table. 
             //compute the hard way. 
-            for (int i = (min | 1); i < Int32.MaxValue; i += 2)
+            for (var i = (min | 1); i < int.MaxValue; i += 2)
             {
                 if (IsPrime(i) && ((i - 1) % HashPrime != 0))
                     return i;
@@ -77,7 +78,7 @@ namespace MultiKeyDictionary
         // Returns size of hashtable to grow to.
         public static int ExpandPrime(int oldSize)
         {
-            int newSize = 2 * oldSize;
+            var newSize = 2 * oldSize;
 
             // Allow the hashtables to grow to maximum possible size (~2G elements) before encoutering capacity overflow.
             // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
